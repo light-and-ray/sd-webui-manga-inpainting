@@ -6,6 +6,8 @@ This is an extension for [stable-diffusion-webui](https://github.com/AUTOMATIC11
 
 *Comparison with lama (right)*
 
+Useful for dotted black & white images. For not dotted lama is better
+
 ![](/images/preview.jpg)
 
 Installation:
