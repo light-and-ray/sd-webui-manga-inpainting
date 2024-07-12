@@ -2,7 +2,7 @@ from PIL import Image, ImageOps
 import torch
 import numpy as np
 import os
-from modules import devices
+from modules import devices, shared
 from .tools import (convertImageIntoPILFormat, convertIntoCNImageFormat,
 )
 from .options import getPreprocessorResolution
@@ -11,9 +11,12 @@ from .repo.src.manga_inpaintor import MangaInpaintor
 
 
 def genMangaLines(image: Image.Image):
-    from scripts.preprocessor.legacy.processor import lineart_anime_denoise
+    from scripts.preprocessor.legacy.processor import lineart_anime_denoise, unload_lineart_anime_denoise
     image = convertIntoCNImageFormat(image)
     image = lineart_anime_denoise(image, getPreprocessorResolution())[0]
+    if shared.cmd_opts.lowvram or shared.cmd_opts.medvram:
+        unload_lineart_anime_denoise()
+        devices.torch_gc()
     image = convertImageIntoPILFormat(image)
     image = ImageOps.invert(image)
     return image
@@ -42,5 +45,10 @@ def process(image: Image.Image, mask: Image.Image, seed: int):
 
     with torch.no_grad():
         result = model.test()
+
+    if shared.cmd_opts.lowvram or shared.cmd_opts.medvram:
+        model.svae_model.cpu()
+        model.manga_inpaint_model.cpu()
+        devices.torch_gc()
 
     return result
