@@ -3,7 +3,7 @@ import torch
 import numpy as np
 import os
 from modules import devices
-from .tools import (convertImageIntoPILFormat, convertIntoCNImageFormat, generateSeed,
+from .tools import (convertImageIntoPILFormat, convertIntoCNImageFormat,
 )
 from .options import getPreprocessorResolution
 from .repo.src.config import Config
@@ -31,7 +31,7 @@ def process(image: Image.Image, mask: Image.Image, seed: int):
     config.RESULTS = None
 
     config.DEVICE = devices.device
-    config.SEED = generateSeed() if seed == -1 else seed
+    config.SEED = seed
     torch.manual_seed(config.SEED)
     torch.cuda.manual_seed_all(config.SEED)
     np.random.seed(config.SEED)

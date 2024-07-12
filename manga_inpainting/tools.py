@@ -1,13 +1,9 @@
 import numpy as np
-import cv2, random
+import cv2
 from PIL import Image, ImageChops
-from modules import shared, errors, masking
+from modules import masking
 from modules.processing import apply_overlay
 
-
-
-def generateSeed():
-    return int(random.randrange(4294967294))
 
 
 def crop(image: Image.Image, origMask: Image.Image, padding: int):
