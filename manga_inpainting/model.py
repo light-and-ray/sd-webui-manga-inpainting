@@ -5,21 +5,21 @@ import os
 from modules import devices
 from .tools import (convertImageIntoPILFormat, convertIntoCNImageFormat, generateSeed,
 )
+from .options import getPreprocessorResolution
 from .repo.src.config import Config
 from .repo.src.manga_inpaintor import MangaInpaintor
 
 
 def genMangaLines(image: Image.Image):
     from scripts.preprocessor.legacy.processor import lineart_anime_denoise
-    resoluion = 512
     image = convertIntoCNImageFormat(image)
-    image = lineart_anime_denoise(image, resoluion)[0]
+    image = lineart_anime_denoise(image, getPreprocessorResolution())[0]
     image = convertImageIntoPILFormat(image)
     image = ImageOps.invert(image)
     return image
 
 
-def process(image: Image.Image, mask: Image.Image):
+def process(image: Image.Image, mask: Image.Image, seed: int):
     config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'repo', 'checkpoints', 'config.yml')
     config = Config(config_path)
 
@@ -31,7 +31,7 @@ def process(image: Image.Image, mask: Image.Image):
     config.RESULTS = None
 
     config.DEVICE = devices.device
-    config.SEED = generateSeed()
+    config.SEED = generateSeed() if seed == -1 else seed
     torch.manual_seed(config.SEED)
     torch.cuda.manual_seed_all(config.SEED)
     np.random.seed(config.SEED)

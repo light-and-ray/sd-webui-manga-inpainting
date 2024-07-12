@@ -107,7 +107,6 @@ class MangaInpaintor():
 
         result = self.postprocess(result)[0]
         result = result.detach().cpu().numpy()
-        print('!!!', result.shape)
         if result.shape[2]>3:
             result = getpca(result.transpose(2,0,1)).transpose(1,2,0)
         result = Image.fromarray(result.astype(np.uint8).squeeze())

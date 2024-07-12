@@ -2,10 +2,9 @@ from PIL import Image, ImageOps
 import copy
 from typing import Any
 from dataclasses import dataclass
-from modules.images import resize_image
 from modules import shared
 from .model import process
-from .tools import (crop, uncrop, areImagesTheSame, applyMaskBlur, limitSizeByMinDimension
+from .tools import (crop, uncrop, areImagesTheSame, applyMaskBlur
 )
 
 
@@ -14,9 +13,8 @@ class CacheData:
     image: Any
     mask: Any
     invert: Any
-    upscaler: Any
     padding: Any
-    resolution: Any
+    seed: Any
     blur: Any
     result: Any
 
@@ -25,14 +23,13 @@ cachedData = None
 
 
 
-def mangaInpaint(image: Image, mask: Image, invert: int, upscaler: str, padding: int|None, resolution: int, blur: int):
+def mangaInpaint(image: Image, mask: Image, invert: int, padding: int|None, seed: int, blur: int):
     global cachedData
     result = None
     if cachedData is not None and\
             cachedData.invert == invert and\
-            cachedData.upscaler == upscaler and\
             cachedData.padding == padding and\
-            cachedData.resolution == resolution and\
+            cachedData.seed == seed and\
             cachedData.blur == blur and\
             areImagesTheSame(cachedData.image, image) and\
             areImagesTheSame(cachedData.mask, mask):
@@ -40,7 +37,7 @@ def mangaInpaint(image: Image, mask: Image, invert: int, upscaler: str, padding:
         print("manga inpainted restored from cache")
         shared.state.assign_current_image(result)
     else:
-        forCache = CacheData(image.copy(), mask.copy(), invert, upscaler, padding, resolution, blur, None)
+        forCache = CacheData(image.copy(), mask.copy(), invert, padding, seed, blur, None)
         if invert == 1:
             mask = ImageOps.invert(mask)
         mask = applyMaskBlur(mask, blur)
@@ -50,22 +47,12 @@ def mangaInpaint(image: Image, mask: Image, invert: int, upscaler: str, padding:
             maskNotCropped = mask
             image = crop(image, maskNotCropped, padding)
             mask = crop(mask, maskNotCropped, padding)
-        resolution = min(*image.size, resolution)
-        newW, newH = limitSizeByMinDimension(image, resolution)
-        imageRes = image.resize((newW, newH))
-        maskRes = mask.resize((newW, newH))
         shared.state.textinfo = "manga inpainting"
-        tmpImage = process(imageRes, maskRes)
-        inpaintedImage = imageRes
-        inpaintedImage.paste(tmpImage, maskRes)
-        shared.state.assign_current_image(inpaintedImage)
-        w, h = image.size
-        shared.state.textinfo = "upscaling manga inpainted"
-        inpaintedImage = resize_image(0, inpaintedImage.convert('RGB'), w, h, upscaler).convert('RGBA')
-        result = image
-        result.paste(inpaintedImage, mask)
+        tmpImage = process(image, mask, seed)
+        inpaintedImage = image.copy()
+        inpaintedImage.paste(tmpImage, mask)
         if padding is not None:
-            result = uncrop(result, initImage, maskNotCropped, padding)
+            result = uncrop(inpaintedImage, initImage, maskNotCropped, padding)
         shared.state.textinfo = ""
         forCache.result = result.copy()
         cachedData = forCache
