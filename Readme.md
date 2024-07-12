@@ -6,7 +6,7 @@ This is an extension for [stable-diffusion-webui](https://github.com/AUTOMATIC11
 
 *Comparison with lama (right)*
 
-Useful for dotted black & white images. For not dotted lama is better
+Useful for dotted/lined black & white images. For not dotted lama is better. Also if both manga shows bad results on some dotted surfaces, [resynthesizer](https://github.com/light-and-ray/sd-webui-resynthesizer-masked-content) can help, because it's not-ai algorithm and copies textures around
 
 ![](/images/preview.jpg)
 
