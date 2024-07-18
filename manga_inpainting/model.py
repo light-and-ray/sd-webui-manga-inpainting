@@ -46,9 +46,8 @@ def process(image: Image.Image, mask: Image.Image, seed: int):
     with torch.no_grad():
         result = model.test()
 
-    if shared.cmd_opts.lowvram or shared.cmd_opts.medvram:
-        model.svae_model.cpu()
-        model.manga_inpaint_model.cpu()
-        devices.torch_gc()
+    model.svae_model.cpu()
+    model.manga_inpaint_model.cpu()
+    devices.torch_gc()
 
     return result
