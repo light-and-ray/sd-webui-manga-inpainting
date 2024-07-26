@@ -19,7 +19,7 @@ def uncrop(image: Image.Image, origImage: Image.Image, origMask: Image.Image, pa
     image_masked = Image.new('RGBa', (origImage.width, origImage.height))
     image_masked.paste(origImage.convert("RGBA").convert("RGBa"), mask=ImageChops.invert(origMask))
     overlay_image = image_masked.convert('RGBA')
-    return apply_overlay(image, paste_to, overlay_image)[0]
+    return apply_overlay(image.convert("RGB"), paste_to, overlay_image)[0].convert("RGBA")
 
 
 
